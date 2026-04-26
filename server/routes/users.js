@@ -1,13 +1,14 @@
 import express from 'express';
-import { getUserById,getUserByUserNamePassword,getAllUser,registerUser,updateUser } from '../controllers/usersCon.js';
+import { getUserById,getAllUser,getStudentsByClass,getUserByUserNamePassword,registerUser } from '../controllers/usersCon.js';
 import {verifyToken}  from '../middlewares/verifyToken.js';
 const router = express.Router();
 
- 
-router.get('/id', verifyToken(), getUserById);
-router.get('/',verifyToken(['manager']), getAllUser);
+router.get('/my-students', verifyToken(['teacher']), getStudentsByClass);
+router.get('/:id', verifyToken(['teacher']), getUserById);
+router.get('/',verifyToken(['teacher']), getAllUser);
 router.post('/login', getUserByUserNamePassword);
 router.post('/register', registerUser);
+
 
 export default router;
 
