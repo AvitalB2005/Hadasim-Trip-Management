@@ -1,2 +1,17 @@
-node_modules/
-.env
+# --- General ---
+.DS_Store
+.vscode/
+.idea/
+*.log
+
+# --- Client ---
+client/node_modules/
+client/dist/
+client/dist-ssr/
+client/.env
+client/*.local
+
+# --- Server ---
+server/node_modules/
+server/.env
+server/*.local
