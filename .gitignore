@@ -10,6 +10,7 @@ client/dist/
 client/dist-ssr/
 client/.env
 client/*.local
+client/docs/
 
 # --- Server ---
 server/node_modules/
