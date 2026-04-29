@@ -3,13 +3,6 @@ import { TOKEN_KEY } from '../constants.js';
 
 const baseUrl = () => import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
-function errorMessageFromBody(data) {
-  if (data?.message) return data.message;
-  if (typeof data?.error === 'string') return data.error;
-  if (data?.error?.message) return data.error.message;
-  return 'שגיאה לא ידועה';
-}
-
 /**
  * @param {string} navigateString - נתיב אחרי /api/ (למשל 'classes', 'users/login')
  * @param {string} [methodType='GET']
@@ -36,7 +29,7 @@ async function fetchData(navigateString, methodType = 'GET', dataContent = null)
   const data = await response.json();//קבלת מידע מהשרת
 
   if (!response.ok) {
-    throw new Error(errorMessageFromBody(data));
+    throw new Error(data?.message || data?.error || 'שגיאה לא ידועה');
   }
 
   return data;

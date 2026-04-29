@@ -194,7 +194,6 @@ export default function RegisterPage() {
               </Stack>
             )}
 
-            {/* הודעת שגיאה - ללא variant="filled" כדי שתהיה ורדרדה כמו ב-Login */}
             {submitError ? <Alert severity="error">{submitError}</Alert> : null}
 
             <Button 

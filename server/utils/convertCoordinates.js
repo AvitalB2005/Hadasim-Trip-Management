@@ -1,4 +1,4 @@
-const convertCoordinates = (coords) => {
+export const convertCoordinates = (coords) => {
     // חישוב קו רוחב - Latitude
     const latDegrees = Number(coords.Latitude.Degrees);
     const latMinutes = Number(coords.Latitude.Minutes);
@@ -16,5 +16,3 @@ const convertCoordinates = (coords) => {
         longitude: lngDecimal
     };
 };
-
-export default convertCoordinates;

@@ -11,10 +11,6 @@ export default function LoginPage() {
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
-  // #region agent log
-  fetch('http://127.0.0.1:7436/ingest/6bd28815-0d30-40b9-ac47-aead260f2655', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Debug-Session-Id': '779a0e' }, body: JSON.stringify({ sessionId: '779a0e', runId: 'initial', hypothesisId: 'H1,H2,H3', location: 'client/src/pages/LoginPage.jsx:13', message: 'LoginPage rendered', data: { hasError: Boolean(error), submitting }, timestamp: Date.now() }) }).catch(() => {});
-  // #endregion
-
   async function handleSubmit(e) {
     e.preventDefault();
     setError('');

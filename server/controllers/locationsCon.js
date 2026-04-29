@@ -1,51 +1,43 @@
 import locationsMod from '../models/locationsMod.js';
-import convertCoordinates from '../utils/convertCoordinates.js';
-
-function toMySqlDatetime(value) {
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return null;
-  return date.toISOString().slice(0, 19).replace('T', ' ');
-}
+import { convertCoordinates } from '../utils/convertCoordinates.js';
 
 export async function importLocations(req, res) {
-  const payload = Array.isArray(req.body) ? req.body : req.body?.records;
-  if (!Array.isArray(payload) || payload.length === 0) {
-    return res.status(400).json({ message: 'חובה לשלוח מערך רשומות מיקום' });
+  const { ID, Coordinates, Time } = req.body;
+  // שליפת המפתח מהכותרות (Headers)
+  const apiKey = req.headers['x-api-key']; 
+
+  try {
+      // בדיקה: האם המפתח שהגיע תואם למפתח הסודי שלנו?
+      if (apiKey !== process.env.DEVICE_SECRET_KEY) {
+          return res.status(401).json({ message: 'גישה למכשיר לא מורשית' });
+      }
+      if (!ID || !Coordinates || !Time) {
+          return res.status(400).json({ message: 'נתוני מיקום חסרים' });
+      }
+      const { latitude, longitude } = convertCoordinates(Coordinates);
+      const dateObj = new Date(Time);//המרה לאוביקט זמן
+      const mysqlTime = dateObj.toISOString().slice(0, 19).replace('T', ' ');//המרה לפורמט של MySQL
+
+      const updatedLocation = await locationsMod.upsertLocation(ID, latitude, longitude, mysqlTime);
+
+      res.status(201).json({ message: 'Location updated', location: updatedLocation });
+  } catch (error) {
+      console.error('Update Location Error:', error);
+      res.status(500).json({ message: 'שגיאה בעדכון מיקום', error });
   }
+}
 
-  const errors = [];
-  let saved = 0;
-
-  for (let i = 0; i < payload.length; i += 1) {
-    const row = payload[i];
+export async function getAllStudentLocations(req, res) {
     try {
-      const user_id = String(row.ID || '').trim();
-      if (!/^\d{9}$/.test(user_id)) {
-        throw new Error('ID חייב להכיל 9 ספרות');
-      }
+        if (req.user.role !== 'teacher') {
+            return res.status(403).json({ message: 'גישה מורשית למורות בלבד' });
+        }
 
-      const { latitude, longitude } = convertCoordinates(row.Coordinates);
-      const event_time = toMySqlDatetime(row.Time);
-      if (!event_time) {
-        throw new Error('Time לא בפורמט תאריך תקין');
-      }
-
-      await locationsMod.upsertLocation({ user_id, latitude, longitude, event_time });
-      saved += 1;
-    } catch (err) {
-      errors.push({
-        index: i,
-        id: row?.ID ?? null,
-        message: err.message || 'שגיאה לא ידועה'
-      });
+        const locations = await locationsMod.getAllLocations();
+        console.log("!!! מה שהשרת קיבל מה-DB:", locations);
+        res.json(locations);
+    } catch (error) {
+        console.error('Get Locations Error:', error);
+        res.status(500).json({ message: 'שגיאה בשליפת מיקומים', error });
     }
-  }
-
-  return res.status(errors.length ? 207 : 200).json({
-    message: errors.length ? 'הייבוא הושלם עם שגיאות חלקיות' : 'הייבוא הושלם בהצלחה',
-    total: payload.length,
-    saved,
-    failed: errors.length,
-    errors
-  });
 }
