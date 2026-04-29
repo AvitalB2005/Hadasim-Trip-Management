@@ -1,6 +1,10 @@
-// דף הרשמה: טעינת כיתות (GET ציבורי), שליחת register, תלמידה→/end, מורה→login+שמירת טוקן→/dashboard
-import { useEffect, useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+﻿import { useEffect, useState } from 'react';
+import { Link as RouterLink, useNavigate } from 'react-router-dom';
+import {
+  Alert, Box, Button, Container, FormControl, FormControlLabel,
+  FormLabel, InputLabel, Link, MenuItem, Paper, Radio, RadioGroup,
+  Select, Stack, TextField, Typography
+} from '@mui/material';
 import fetchData from '../service/FetchData.js';
 import { TOKEN_KEY } from '../constants.js';
 
@@ -17,36 +21,75 @@ export default function RegisterPage() {
   const [submitError, setSubmitError] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
+  // ולידציה לסיסמה: לפחות 6 תווים, אות אחת ומספר אחד
+  const isPasswordValid = /^(?=.*[A-Za-z])(?=.*\d).{6,}$/.test(password);
+
+  // טעינת רשימת כיתות מהשרת
   useEffect(() => {
-    let cancelled = false;
-    (async () => {
+    async function getClasses() {
       try {
         const data = await fetchData('classes', 'GET');
-        if (!cancelled) setClasses(Array.isArray(data) ? data : []);
+        setClasses(Array.isArray(data) ? data : []);
       } catch (e) {
-        if (!cancelled) setClassesError(e.message || 'שגיאה בטעינת כיתות');
+        setClassesError(e.message || 'שגיאה בטעינת כיתות');
       }
-    })();
-    return () => {
-      cancelled = true;
-    };
+    }
+    getClasses();
   }, []);
 
+  // ניקוי שדות ושגיאות בעת מעבר בין תפקיד תלמידה למורה
+  useEffect(() => {
+    if (role !== 'teacher') {
+      setPassword('');
+      setTeacherCode('');
+    }
+    setSubmitError('');
+  }, [role]);
+
   async function handleSubmit(e) {
+    // מניעת רענון הדף
     e.preventDefault();
     setSubmitError('');
+
+    // בדיקת שם מלא (חובה)
+    if (!fullName.trim()) {
+      setSubmitError('נא להזין שם מלא');
+      return;
+    }
+
+    // בדיקת תעודת זהות (בדיוק 9 ספרות)
+    if (userId.length !== 9) {
+      setSubmitError('תעודת זהות חייבת להכיל בדיוק 9 ספרות');
+      return;
+    }
+
+    // בדיקת בחירת כיתה
+    if (!classId) {
+      setSubmitError('נא לבחור כיתה מהרשימה');
+      return;
+    }
+
+    // בדיקות אבטחה למורה בלבד
+    if (role === 'teacher') {
+      if (!isPasswordValid) {
+        setSubmitError('הסיסמה חייבת לכלול לפחות 6 תווים, אות ומספר');
+        return;
+      }
+      if (!teacherCode.trim()) {
+        setSubmitError('נא להזין קוד אימות מורה');
+        return;
+      }
+    }
+
     setSubmitting(true);
 
     const body = {
       user_id: userId.trim(),
       full_name: fullName.trim(),
-      password,
       role,
-      class_id: classId === '' ? null : Number(classId)
+      class_id: Number(classId),
+      ...(role === 'teacher' && { password, teacherCode })
     };
-    if (role === 'teacher') {
-      body.teacherCode = teacherCode;
-    }
 
     try {
       const data = await fetchData('users/register', 'POST', body);
@@ -59,16 +102,17 @@ export default function RegisterPage() {
         return;
       }
 
+      // התחברות אוטומטית למורות כדי לחסוך להן כניסה נוספת
       const loginData = await fetchData('users/login', 'POST', {
         user_id: userId.trim(),
         password
       });
-
       if (loginData.token) {
         localStorage.setItem(TOKEN_KEY, loginData.token);
       }
       navigate('/dashboard', { replace: true });
     } catch (err) {
+      // הצגת שגיאות שרת (כמו "משתמש קיים") בפורמט זהה ל-Login
       setSubmitError(err.message || 'שגיאת רשת');
     } finally {
       setSubmitting(false);
@@ -76,105 +120,100 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="page register-page">
-      <h1>הרשמה</h1>
-      <p className="register-links">
-        <Link to="/login">כבר רשומה? כניסת מורות למערכת הניהול</Link>
-      </p>
+    <Container maxWidth="sm" sx={{ py: 3 }}>
+      <Typography variant="h5" align="center" color="primary" gutterBottom sx={{ fontWeight: 'bold' }}>
+        טופס הרשמה לטיול
+      </Typography>
 
-      {classesError ? <p className="form-error">{classesError}</p> : null}
+      {/* שגיאה בטעינת הנתונים הראשונית */}
+      {classesError ? <Alert severity="warning" sx={{ mb: 2 }}>{classesError}</Alert> : null}
 
-      <form onSubmit={handleSubmit} className="register-form">
-        <label>
-          תעודת זהות (9 ספרות)
-          <input
-            type="text"
-            inputMode="numeric"
-            maxLength={9}
-            value={userId}
-            onChange={(ev) => setUserId(ev.target.value.replace(/\D/g, ''))}
-            required
-          />
-        </label>
-
-        <label>
-          שם מלא
-          <input
-            type="text"
-            value={fullName}
-            onChange={(ev) => setFullName(ev.target.value)}
-            required
-          />
-        </label>
-
-        <label>
-          סיסמה
-          <input
-            type="password"
-            value={password}
-            onChange={(ev) => setPassword(ev.target.value)}
-            required
-          />
-        </label>
-
-        <label>
-          כיתה
-          <select
-            value={classId}
-            onChange={(ev) => setClassId(ev.target.value)}
-            required
-          >
-            <option value="">בחרי כיתה</option>
-            {classes.map((c) => (
-              <option key={c.class_id} value={c.class_id}>
-                {c.class_name}
-              </option>
-            ))}
-          </select>
-        </label>
-
-        <fieldset className="role-fieldset">
-          <legend>תפקיד</legend>
-          <label className="inline">
-            <input
-              type="radio"
-              name="role"
-              value="student"
-              checked={role === 'student'}
-              onChange={() => setRole('student')}
-            />
-            תלמידה
-          </label>
-          <label className="inline">
-            <input
-              type="radio"
-              name="role"
-              value="teacher"
-              checked={role === 'teacher'}
-              onChange={() => setRole('teacher')}
-            />
-            מורה
-          </label>
-        </fieldset>
-
-        {role === 'teacher' ? (
-          <label>
-            קוד אימות מורה
-            <input
-              type="password"
-              value={teacherCode}
-              onChange={(ev) => setTeacherCode(ev.target.value)}
+      <Paper sx={{ p: 3, mt: 2, borderRadius: 2 }}>
+        <Box component="form" onSubmit={handleSubmit} noValidate>
+          <Stack spacing={2.5}>          
+            <TextField
+              label="שם מלא"
+              value={fullName}
+              onChange={(ev) => setFullName(ev.target.value)}
               required
+              fullWidth
             />
-          </label>
-        ) : null}
+            
+            <TextField
+              label="תעודת זהות"
+              value={userId}
+              onChange={(ev) => setUserId(ev.target.value.replace(/\D/g, ''))}
+              inputProps={{ maxLength: 9 }}
+              required
+              fullWidth
+            />
 
-        {submitError ? <p className="form-error">{submitError}</p> : null}
+            <FormControl fullWidth required disabled={!!classesError}>
+              <InputLabel id="class-label">כיתה</InputLabel>
+              <Select
+                labelId="class-label"
+                label="כיתה"
+                value={classId}
+                onChange={(ev) => setClassId(ev.target.value)}
+              >
+                <MenuItem value=""><em>בחרי כיתה</em></MenuItem>
+                {classes.map((c) => (
+                  <MenuItem key={c.class_id} value={String(c.class_id)}>
+                    {c.class_name}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
 
-        <button type="submit" disabled={submitting || !!classesError}>
-          {submitting ? 'שולח...' : 'הרשמה'}
-        </button>
-      </form>
-    </div>
+            <FormControl>
+              <FormLabel>תפקיד</FormLabel>
+              <RadioGroup row value={role} onChange={(ev) => setRole(ev.target.value)}>
+                <FormControlLabel value="student" control={<Radio />} label="תלמידה" />
+                <FormControlLabel value="teacher" control={<Radio />} label="מורה" />
+              </RadioGroup>
+            </FormControl>
+
+            {role === 'teacher' && (
+              <Stack spacing={2}>
+                <TextField
+                  label="סיסמה"
+                  type="password"
+                  value={password}
+                  onChange={(ev) => setPassword(ev.target.value)}
+                  required
+                  fullWidth
+                />
+                <TextField
+                  label="קוד אימות מורה"
+                  type="password"
+                  value={teacherCode}
+                  onChange={(ev) => setTeacherCode(ev.target.value)}
+                  required
+                  fullWidth
+                />
+              </Stack>
+            )}
+
+            {/* הודעת שגיאה - ללא variant="filled" כדי שתהיה ורדרדה כמו ב-Login */}
+            {submitError ? <Alert severity="error">{submitError}</Alert> : null}
+
+            <Button 
+              type="submit" 
+              variant="contained" 
+              size="large"
+              disabled={submitting || !!classesError}
+            >
+              {submitting ? 'שולח...' : 'הרשמה'}
+            </Button>
+          </Stack>
+        </Box>
+      </Paper>
+
+      <Box sx={{ textAlign: 'center', mt: 3 }}>
+        <Link component={RouterLink} to="/login" underline="hover" color="primary">
+          כבר רשומה? כניסה למערכת הניהול
+        </Link>
+      </Box>
+    </Container>
   );
 }

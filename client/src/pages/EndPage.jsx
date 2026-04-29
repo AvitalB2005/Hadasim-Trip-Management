@@ -1,16 +1,20 @@
-// מסך סיום אחרי רישום תלמידה — הודעה מגיעה ב-navigate(..., { state: { message } })
-import { useLocation, Link } from 'react-router-dom';
+import { Link as RouterLink } from 'react-router-dom';
+import { Button, Container, Paper, Stack, Typography } from '@mui/material';
 
 export default function EndPage() {
-  const location = useLocation();
-  const message = location.state?.message || 'נרשמת בהצלחה';
 
   return (
-    <div className="page">
-      <h1>{message}</h1>
-      <p>
-        <Link to="/register">חזרה להרשמה</Link>
-      </p>
-    </div>
+    <Container maxWidth="sm" sx={{ py: 3 }}>
+      <Paper sx={{ p: 2 }}>
+        <Stack spacing={2} alignItems="center">
+          <Typography variant="h5" align="center">
+            {"ההרשמה הושלמה בהצלחה"}
+          </Typography>
+          <Button component={RouterLink} to="/register" variant="outlined">
+            חזרה להרשמה
+          </Button>
+        </Stack>
+      </Paper>
+    </Container>
   );
 }

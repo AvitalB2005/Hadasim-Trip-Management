@@ -1,3 +1,4 @@
+import crypto from 'crypto';
 import usersMod from '../models/usersMod.js';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
@@ -116,14 +117,29 @@ export async function registerUser(req, res) {
             return res.status(409).json({ message: 'משתמשת עם תעודת זהות זו כבר קיימת במערכת' });
         }
 
-        const hashedPassword = await bcrypt.hash(password, saltRounds);
+        let plainPassword = password;
+        if (role === 'student') {
+            plainPassword =
+                password && String(password).length > 0
+                    ? String(password)
+                    : crypto.randomBytes(16).toString('hex');
+        } else if (!password || String(password).length < 1) {
+            return res.status(400).json({ message: 'חובה לבחור סיסמה למורה' });
+        }
+
+        const hashedPassword = await bcrypt.hash(plainPassword, saltRounds);
+
+        const resolvedClassId =
+            class_id === undefined || class_id === null || class_id === ''
+                ? null
+                : Number(class_id);
 
         const newUser = await usersMod.registerUser({
             user_id,
             full_name,
             password: hashedPassword,
             role,
-            class_id
+            class_id: resolvedClassId
         });
 
         const { password: _, ...userSafeData } = newUser;

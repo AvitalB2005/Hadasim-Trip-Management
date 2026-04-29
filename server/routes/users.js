@@ -4,7 +4,7 @@ import {verifyToken}  from '../middlewares/verifyToken.js';
 const router = express.Router();
 
 router.get('/my-students', verifyToken(['teacher']), getStudentsByClass);
-router.get('/:id', verifyToken(['teacher']), getUserById);
+router.get('/user/:id', verifyToken(['teacher']), getUserById);
 router.get('/',verifyToken(['teacher']), getAllUser);
 router.post('/login', getUserByUserNamePassword);
 router.post('/register', registerUser);

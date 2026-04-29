@@ -1,15 +1,19 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link as RouterLink, useNavigate } from 'react-router-dom';
+import { Alert, Box, Button, Container, Paper, Stack, TextField, Typography } from '@mui/material';
 import fetchData from '../service/FetchData.js';
 import { TOKEN_KEY } from '../constants.js';
 
-// התחברות מורה בלבד (השרת דוחה תלמידה). אחרי הצלחה — שמירת JWT ומעבר לדשבורד.
 export default function LoginPage() {
   const navigate = useNavigate();
   const [userId, setUserId] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
+
+  // #region agent log
+  fetch('http://127.0.0.1:7436/ingest/6bd28815-0d30-40b9-ac47-aead260f2655', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Debug-Session-Id': '779a0e' }, body: JSON.stringify({ sessionId: '779a0e', runId: 'initial', hypothesisId: 'H1,H2,H3', location: 'client/src/pages/LoginPage.jsx:13', message: 'LoginPage rendered', data: { hasError: Boolean(error), submitting }, timestamp: Date.now() }) }).catch(() => {});
+  // #endregion
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -32,38 +36,43 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="page">
-      <h1>כניסת מורות למערכת הניהול</h1>
-      <p>
-        <Link to="/register">חזרה להרשמה</Link>
-      </p>
+    <Container maxWidth="sm" sx={{ py: 3 }}>
+      <Typography variant="h5" align="center" color="primary" gutterBottom>
+        כניסת מורות למערכת הניהול
+      </Typography>
 
-      <form onSubmit={handleSubmit} className="register-form">
-        <label>
-          תעודת זהות (מורה)
-          <input
-            type="text"
-            inputMode="numeric"
-            maxLength={9}
-            value={userId}
-            onChange={(ev) => setUserId(ev.target.value.replace(/\D/g, ''))}
-            required
-          />
-        </label>
-        <label>
-          סיסמה
-          <input
-            type="password"
-            value={password}
-            onChange={(ev) => setPassword(ev.target.value)}
-            required
-          />
-        </label>
-        {error ? <p className="form-error">{error}</p> : null}
-        <button type="submit" disabled={submitting}>
-          {submitting ? 'מתחברת...' : 'כניסה'}
-        </button>
-      </form>
-    </div>
+      <Paper sx={{ p: 2, mt: 2 }}>
+        <Box component="form" onSubmit={handleSubmit}>
+          <Stack spacing={2}>
+            <TextField
+              label="תעודת זהות (מורה)"
+              value={userId}
+              onChange={(ev) => setUserId(ev.target.value.replace(/\D/g, ''))}
+              inputProps={{ maxLength: 9 }}
+              required
+              fullWidth
+            />
+            <TextField
+              label="סיסמה"
+              type="password"
+              value={password}
+              onChange={(ev) => setPassword(ev.target.value)}
+              required
+              fullWidth
+            />
+            {error ? <Alert severity="error">{error}</Alert> : null}
+            <Button type="submit" variant="contained" disabled={submitting}>
+              {submitting ? 'מתחברת...' : 'כניסה'}
+            </Button>
+          </Stack>
+        </Box>
+      </Paper>
+
+      <Box sx={{ textAlign: 'center', mt: 2 }}>
+        <Button variant="outlined" component={RouterLink} to="/register">
+          חזרה להרשמה
+        </Button>
+      </Box>
+    </Container>
   );
 }
