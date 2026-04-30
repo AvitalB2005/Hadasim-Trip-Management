@@ -17,21 +17,23 @@ async function upsertLocation(user_id, lat, lng, event_time) {
   }
 }
 
-async function getAllLocations() {
+async function getLocationsForTeacher(class_id, teacher_id) {
   try {
     const sql = `
-      SELECT 
-       l.user_id, 
-       l.latitude, 
-       l.longitude, 
-       l.event_time, 
-       u.full_name, 
-       u.role, 
-       u.class_id 
-     FROM Locations l
-  JOIN Users u ON l.user_id = u.user_id
+     SELECT 
+      l.user_id, 
+      l.latitude, 
+      l.longitude, 
+      l.event_time, 
+      u.full_name, 
+      u.role, 
+      u.class_id
+    FROM Locations l
+     JOIN Users u ON l.user_id = u.user_id
+    WHERE (u.role = 'student' AND u.class_id = ?) 
+     OR u.user_id = ?
 `;
-    const [rows] = await pool.query(sql);
+    const [rows] = await pool.query(sql, [class_id, teacher_id]);
     return rows;
   } catch (error) {
     throw error;
@@ -40,5 +42,5 @@ async function getAllLocations() {
 
 export default {
   upsertLocation,
-  getAllLocations
+  getLocationsForTeacher
 };

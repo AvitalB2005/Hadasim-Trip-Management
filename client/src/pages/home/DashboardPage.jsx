@@ -1,9 +1,9 @@
-﻿import { useCallback, useEffect, useState } from 'react';
-import { Link as RouterLink, useNavigate } from 'react-router-dom';
-import {Alert,Box,Button,CircularProgress,Container,Paper,Stack,Table,TableBody,
- TableCell,TableContainer,TableHead,TableRow,TextField,Typography } from '@mui/material';
-import fetchData from '../service/FetchData.js';
-import { TOKEN_KEY } from '../constants.js';
+import { useCallback, useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Alert, Box, Button, CircularProgress, Container, Paper, Stack, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField, Typography } from '@mui/material';
+import fetchData from '../../service/FetchData.js';
+import { TOKEN_KEY } from '../../constants.js';
+import MapPage from '../map/MapPage.jsx';
 
 export default function DashboardPage() {
   const navigate = useNavigate();
@@ -116,9 +116,6 @@ export default function DashboardPage() {
         <Button variant="outlined" size="small" onClick={handleLogout}>
           התנתקות
         </Button>
-        <Button variant="outlined" size="small" component={RouterLink} to="/register">
-          הרשמה
-        </Button>
       </Box>
 
       <Typography variant="h4" align="center" color="primary" gutterBottom sx={{ mt: 1 }}>
@@ -127,57 +124,31 @@ export default function DashboardPage() {
 
       <Stack spacing={2} sx={{ mt: 2 }}>
         <Stack direction="row" spacing={1} flexWrap="wrap" justifyContent="center">
-          <Button
-            variant={activeView === 'users' ? 'contained' : 'outlined'}
-            onClick={() => setActiveView('users')}
-          >
+          <Button variant={activeView === 'users' ? 'contained' : 'outlined'} onClick={() => setActiveView('users')}>
             כל המשתמשות
           </Button>
-          <Button
-            variant={activeView === 'students' ? 'contained' : 'outlined'}
-            onClick={() => setActiveView('students')}
-          >
+          <Button variant={activeView === 'students' ? 'contained' : 'outlined'} onClick={() => setActiveView('students')}>
             התלמידות שלי
           </Button>
-          <Button
-            variant={activeView === 'add-class' ? 'contained' : 'outlined'}
-            onClick={() => setActiveView('add-class')}
-          >
+          <Button variant={activeView === 'add-class' ? 'contained' : 'outlined'} onClick={() => setActiveView('add-class')}>
             הוספת כיתה
+          </Button>
+          <Button variant={activeView === 'map' ? 'contained' : 'outlined'} onClick={() => setActiveView('map')}>
+            מפה
           </Button>
         </Stack>
 
         {activeView === 'users' ? (
           <Paper sx={{ p: 2 }}>
             <Stack direction="row" spacing={1} flexWrap="wrap" sx={{ mb: 2 }}>
-              <Button
-                size="small"
-                variant={roleFilter === 'all' ? 'contained' : 'outlined'}
-                onClick={() => setRoleFilter('all')}
-              >
-                כללי
-              </Button>
-              <Button
-                size="small"
-                variant={roleFilter === 'teacher' ? 'contained' : 'outlined'}
-                onClick={() => setRoleFilter('teacher')}
-              >
-                מורות
-              </Button>
-              <Button
-                size="small"
-                variant={roleFilter === 'student' ? 'contained' : 'outlined'}
-                onClick={() => setRoleFilter('student')}
-              >
-                תלמידות
-              </Button>
+              <Button size="small" variant={roleFilter === 'all' ? 'contained' : 'outlined'} onClick={() => setRoleFilter('all')}>כללי</Button>
+              <Button size="small" variant={roleFilter === 'teacher' ? 'contained' : 'outlined'} onClick={() => setRoleFilter('teacher')}>מורות</Button>
+              <Button size="small" variant={roleFilter === 'student' ? 'contained' : 'outlined'} onClick={() => setRoleFilter('student')}>תלמידות</Button>
             </Stack>
 
             {listError ? <Alert severity="error">{listError}</Alert> : null}
             {usersLoading ? (
-              <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
-                <CircularProgress />
-              </Box>
+              <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}><CircularProgress /></Box>
             ) : (
               <TableContainer sx={{ maxWidth: 860, mx: 'auto' }}>
                 <Table size="small">
@@ -190,11 +161,7 @@ export default function DashboardPage() {
                   </TableHead>
                   <TableBody>
                     {usersEmpty ? (
-                      <TableRow>
-                        <TableCell colSpan={3} align="center">
-                          אין נתונים להצגה
-                        </TableCell>
-                      </TableRow>
+                      <TableRow><TableCell colSpan={3} align="center">אין נתונים להצגה</TableCell></TableRow>
                     ) : (
                       filteredUsers.map((u) => (
                         <TableRow key={u.user_id}>
@@ -216,9 +183,7 @@ export default function DashboardPage() {
             {listError ? <Alert severity="error">{listError}</Alert> : null}
             {studentsNote ? <Alert severity="info">{studentsNote}</Alert> : null}
             {studentsLoading ? (
-              <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
-                <CircularProgress />
-              </Box>
+              <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}><CircularProgress /></Box>
             ) : (
               <TableContainer sx={{ maxWidth: 860, mx: 'auto' }}>
                 <Table size="small">
@@ -231,11 +196,7 @@ export default function DashboardPage() {
                   </TableHead>
                   <TableBody>
                     {studentsEmpty ? (
-                      <TableRow>
-                        <TableCell colSpan={3} align="center">
-                          אין נתונים להצגה
-                        </TableCell>
-                      </TableRow>
+                      <TableRow><TableCell colSpan={3} align="center">אין נתונים להצגה</TableCell></TableRow>
                     ) : (
                       students.map((s) => (
                         <TableRow key={s.user_id}>
@@ -256,36 +217,21 @@ export default function DashboardPage() {
           <Paper sx={{ p: 2 }}>
             <Box component="form" onSubmit={handleCreateClass}>
               <Stack spacing={2} direction={{ xs: 'column', sm: 'row' }}>
-                <TextField
-                  label="שם כיתה"
-                  value={newClassName}
-                  onChange={(ev) => setNewClassName(ev.target.value)}
-                  required
-                  fullWidth
-                />
-                <TextField
-                  label="מספר כיתה"
-                  value={newClassNumber}
-                  onChange={(ev) => setNewClassNumber(ev.target.value)}
-                  required
-                  fullWidth
-                />
+                <TextField label="שם כיתה" value={newClassName} onChange={(ev) => setNewClassName(ev.target.value)} required fullWidth />
+                <TextField label="מספר כיתה" value={newClassNumber} onChange={(ev) => setNewClassNumber(ev.target.value)} required fullWidth />
                 <Button type="submit" variant="contained" disabled={classSubmitting} sx={{ flexShrink: 0 }}>
                   {classSubmitting ? 'שולח...' : 'הוספה'}
                 </Button>
               </Stack>
-
-              {classSubmitError ? (
-                <Alert severity="error" sx={{ mt: 2 }}>
-                  {classSubmitError}
-                </Alert>
-              ) : null}
-              {classSuccess ? (
-                <Alert severity="success" sx={{ mt: 2 }}>
-                  {classSuccess}
-                </Alert>
-              ) : null}
+              {classSubmitError ? <Alert severity="error" sx={{ mt: 2 }}>{classSubmitError}</Alert> : null}
+              {classSuccess ? <Alert severity="success" sx={{ mt: 2 }}>{classSuccess}</Alert> : null}
             </Box>
+          </Paper>
+        ) : null}
+
+        {activeView === 'map' ? (
+          <Paper sx={{ p: 1 }}>
+            <MapPage />
           </Paper>
         ) : null}
       </Stack>

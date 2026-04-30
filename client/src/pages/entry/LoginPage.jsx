@@ -1,8 +1,8 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import { Alert, Box, Button, Container, Paper, Stack, TextField, Typography } from '@mui/material';
-import fetchData from '../service/FetchData.js';
-import { TOKEN_KEY } from '../constants.js';
+import fetchData from '../../service/FetchData.js';
+import { TOKEN_KEY } from '../../constants.js';
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -10,6 +10,12 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (localStorage.getItem(TOKEN_KEY)) {
+      localStorage.removeItem(TOKEN_KEY);
+    }
+  }, []);
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -48,14 +54,7 @@ export default function LoginPage() {
               required
               fullWidth
             />
-            <TextField
-              label="סיסמה"
-              type="password"
-              value={password}
-              onChange={(ev) => setPassword(ev.target.value)}
-              required
-              fullWidth
-            />
+            <TextField label="סיסמה" type="password" value={password} onChange={(ev) => setPassword(ev.target.value)} required fullWidth />
             {error ? <Alert severity="error">{error}</Alert> : null}
             <Button type="submit" variant="contained" disabled={submitting}>
               {submitting ? 'מתחברת...' : 'כניסה'}

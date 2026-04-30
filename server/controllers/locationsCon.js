@@ -33,9 +33,18 @@ export async function getAllStudentLocations(req, res) {
             return res.status(403).json({ message: 'גישה מורשית למורות בלבד' });
         }
 
-        const locations = await locationsMod.getAllLocations();
-        console.log("!!! מה שהשרת קיבל מה-DB:", locations);
-        res.json(locations);
+        if (!req.user.class_id) {
+            return res.status(400).json({ message: 'למורה לא משויכת כיתה' });
+        }
+
+        const rows = await locationsMod.getLocationsForTeacher(req.user.class_id, req.user.id);
+        const teacherLocation = rows.find((row) => String(row.user_id) === String(req.user.id)) || null;
+        const students = rows.filter((row) => row.role === 'student');
+
+        res.json({
+            teacherLocation,
+            students
+        });
     } catch (error) {
         console.error('Get Locations Error:', error);
         res.status(500).json({ message: 'שגיאה בשליפת מיקומים', error });

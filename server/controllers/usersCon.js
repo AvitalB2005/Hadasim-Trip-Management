@@ -119,10 +119,8 @@ export async function registerUser(req, res) {
 
         let plainPassword = password;
         if (role === 'student') {
-            plainPassword =
-                password && String(password).length > 0
-                    ? String(password)
-                    : crypto.randomBytes(16).toString('hex');
+            // תלמידות לא משתמשות בסיסמה באפליקציה; העמודה ב־DB נשמרת עם hash לערך אקראי שלא נחשף
+            plainPassword = crypto.randomBytes(16).toString('hex');
         } else if (!password || String(password).length < 1) {
             return res.status(400).json({ message: 'חובה לבחור סיסמה למורה' });
         }
