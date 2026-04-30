@@ -3,12 +3,14 @@
 .vscode/
 .idea/
 *.log
+.cursor/
 
 # --- Client ---
 client/node_modules/
 client/dist/
 client/dist-ssr/
 client/.env
+client/src/.env
 client/*.local
 client/docs/
 
