@@ -3,7 +3,7 @@
 .vscode/
 .idea/
 *.log
-.cursor/
+
 
 # --- Client ---
 client/node_modules/
