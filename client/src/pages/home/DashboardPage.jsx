@@ -101,12 +101,19 @@ export default function DashboardPage() {
   }
 
   return (
-    <Container maxWidth="md" sx={{ py: 3 }}>
+    <Container
+      maxWidth="md"
+      sx={{
+        py: { xs: 2, sm: 3 },
+        px: { xs: 2, sm: 3 },
+        boxSizing: 'border-box'
+      }}
+    >
       <Box
         sx={{
           position: 'fixed',
           top: 16,
-          left: 16,
+          insetInlineEnd: 16,
           zIndex: (theme) => theme.zIndex.appBar + 1,
           display: 'flex',
           gap: 1,
@@ -118,12 +125,12 @@ export default function DashboardPage() {
         </Button>
       </Box>
 
-      <Typography variant="h4" align="center" color="primary" gutterBottom sx={{ mt: 1 }}>
+      <Typography variant="h4" align="center" color="primary" gutterBottom sx={{ mt: { xs: 5, sm: 4 }, mb: 0 }}>
         מערכת ניהול הטיול
       </Typography>
 
-      <Stack spacing={2} sx={{ mt: 2 }}>
-        <Stack direction="row" spacing={1} flexWrap="wrap" justifyContent="center">
+      <Stack spacing={2} sx={{ mt: 2, width: '100%', alignItems: 'stretch' }}>
+        <Stack direction="row" spacing={1} flexWrap="wrap" justifyContent="center" useFlexGap sx={{ rowGap: 1 }}>
           <Button variant={activeView === 'users' ? 'contained' : 'outlined'} onClick={() => setActiveView('users')}>
             כל המשתמשות
           </Button>
@@ -230,8 +237,8 @@ export default function DashboardPage() {
         ) : null}
 
         {activeView === 'map' ? (
-          <Paper sx={{ p: 1 }}>
-            <MapPage />
+          <Paper sx={{ p: 2 }}>
+            <MapPage embedded />
           </Paper>
         ) : null}
       </Stack>
