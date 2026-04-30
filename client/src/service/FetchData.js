@@ -3,11 +3,6 @@ import { TOKEN_KEY } from '../constants.js';
 
 const baseUrl = () => import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
-/**
- * @param {string} navigateString - נתיב אחרי /api/ (למשל 'classes', 'users/login')
- * @param {string} [methodType='GET']
- * @param {object|null} [dataContent=null] - גוף JSON ל־POST/PUT וכו'
- */
 async function fetchData(navigateString, methodType = 'GET', dataContent = null) {
   const token = localStorage.getItem(TOKEN_KEY);
 

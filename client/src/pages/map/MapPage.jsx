@@ -123,7 +123,7 @@ function TeacherMapMarker({ teacherLocation }) {
   return (
     <CircleMarker
       center={[Number(teacherLocation.latitude), Number(teacherLocation.longitude)]}
-      radius={10}
+      radius={7}
       pathOptions={{
         color: '#757575',
         fillColor: '#ffffff',

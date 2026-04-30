@@ -8,8 +8,7 @@ CREATE TABLE Classes (
 CREATE TABLE Users (
     user_id VARCHAR(9) PRIMARY KEY,
     full_name VARCHAR(100) NOT NULL,
-    password VARCHAR(255) NOT NULL, -- לשמירת סיסמה מוצפנת
-    -- שימוש ב-ENUM: מקבל רק את שני הערכים האלו
+    password VARCHAR(255) NOT NULL, 
     role ENUM('teacher', 'student') NOT NULL DEFAULT 'student',
     class_id INT,
     FOREIGN KEY (class_id) REFERENCES Classes(class_id) ON DELETE SET NULL
@@ -19,7 +18,6 @@ CREATE TABLE Locations (
     user_id VARCHAR(9) PRIMARY KEY,
     latitude DECIMAL(10, 8) NOT NULL,
     longitude DECIMAL(11, 8) NOT NULL,
-    event_time DATETIME NOT NULL, -- את ממלאת מה-JSON
-    db_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, -- המחשב ממלא לבד
+    event_time DATETIME NOT NULL, 
     FOREIGN KEY (user_id) REFERENCES Users(user_id) ON DELETE CASCADE
 );

@@ -113,7 +113,7 @@ export default function DashboardPage() {
         sx={{
           position: 'fixed',
           top: 16,
-          insetInlineEnd: 16,
+          right: 16,
           zIndex: (theme) => theme.zIndex.appBar + 1,
           display: 'flex',
           gap: 1,

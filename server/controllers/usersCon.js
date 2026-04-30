@@ -3,23 +3,6 @@ import usersMod from '../models/usersMod.js';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 
-//get user by id
-export async function getUserById(req, res) {
-    try {
-        if (req.user.role !== 'teacher') {
-            return res.status(403).json({ message: 'הגישה נדחתה. נדרשת הרשאת מורה' });
-        }
-
-        const user = await usersMod.getUserById(req.params.id);
-        if (!user) return res.status(404).json({ message: 'המשתמשת לא נמצאה' });
-
-        res.json(user);
-    } catch (error) {
-        console.error('Get User By Id Error:', error);
-        res.status(500).json({ message: 'שגיאה בשליפת משתמשת', error });
-    }
-}
-
 //get all users
 export async function getAllUser(req, res) {
     try {
